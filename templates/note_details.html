@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <title>Note Details | FastAPI Notes App</title>
+</head>
+<body>
+    <div class="container items">
+        <h2>Note Details</h2>
+        <div class="note-details">
+            <h3>{{ note.title }}</h3>
+            <p>{{ note.note }}</p>
+        </div>
+        <div class="note-meta">
+            {% if note.important %}
+            <span class="important">Important</span>
+            {% else %}
+            <span class="not-important">Important</span>
+            {% endif %}
+            <span class="date created_at" data="{{note.created_at}}">{{ note.created_at }}</span>
+        </div>
+        <div class="actions">
+            <a class="error" href="{{ url_for('delete_note', note_id=note.id) }}">Delete</a>
+            <a class="success" href="{{ url_for('update_note', note_id=note.id) }}">Update</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 FastAPI Notes App</p>
+    </footer>
+
+    <script>
+         
+        // reset form on submit
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            form.reset();
+        });
+    </script>
+</body>

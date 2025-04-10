@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <title>Notes | FastAPI Notes App</title>
+</head>
+<body>
+    <div class="container items">
+        <a class="add_btn" href="{{url_for('note_form')}}"> + Add Note</a>
+        <h2>You have {{length}} notes</h2>
+        {% if status == "success" %}
+        <p class="msg success">Note updated successfully!</p>
+        {% elif status == "error" %}
+        <p class="msg error">There was an error updated the note.</p>
+        {% endif %}
+        {% if notes == [] %}
+        <p>No notes found.</p>
+        {% else %}
+        <ol>
+            {% for note in notes %}
+            <li data-id="{{ note._id }}">
+                <div class="note-details">
+                    <h3>{{ note.title }}</h3>
+                    <p>{{ note.note }}</p>
+                </div>
+                <div class="right">
+                    <div class="note-meta">
+                        {% if note.important %}
+                        <span class="important">Important</span>
+                        {% else %}
+                        <span class="not-important">Important</span>
+                        {% endif %}
+                        <span class="date created_at">{{ note.created_at }}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="error delete-btn" data-id="{{ note._id }}">Delete</button>
+                        <button class="success update-btn" data-id="{{ note._id }}">Update</button>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+        {% endif %}
+    </div>
+
+    <div class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form action="/update" method="PUT">
+                <input type="hidden" id="note-id" name="id" value="">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="note-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="note-content">Note</label>
+                    <textarea id="note-content" name="note" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="note-important">Important</label>
+                    <input type="checkbox" id="note-important" name="important">
+                </div>
+                <button type="submit" id="update-note">Update Note</button>
+            </form>
+        </div> <!-- Closing modal-content div -->
+    </div> <!-- Closing modal div -->
+    
+    <footer>
+        <p>&copy; 2025 FastAPI Notes App</p>
+    </footer>
+
+    <script>
+
+        //document.addEventListener('DOMContentLoaded', () => {
+
+            // delete note
+            const deleteNote = document.querySelectorAll('.actions .delete-btn');
+            deleteNote.forEach((item) => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const noteId = e.target.dataset.id;
+                    console.log(noteId);
+                    fetch(`/delete/${noteId}`, {
+                        method: 'DELETE',
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.status === 'success') {
+                            e.target.closest('li').remove();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+
+            async function updateNoteFunc() {
+                const noteId = document.getElementById("note-id").value;
+                const title = document.getElementById("note-title").value;
+                const note = document.getElementById("note-content").value;
+                const important = document.getElementById("note-important").checked;
+
+                try {
+                    const response = await fetch("/update", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            id: noteId,
+                            title: title,
+                            note: note,
+                            important: important,
+                        }),
+                    });
+
+                    const data = await response.json();
+                    if (data.status === "success") {
+                        alert("Note updated successfully!");
+                    } else {
+                        alert(data.message || "Failed to update note.");
+                    }
+                } catch (error) {
+                    console.error("Error updating note:", error);
+                    alert("An error occurred while updating the note.");
+                }
+            }
+
+            async function fetchNoteDetails(noteId) {
+                try {
+                    const response = await fetch(`/details/${noteId}`);
+                    console.log(response);
+                    const data = await response.json();
+                    console.log(data);
+
+                    if (data.status === "success") {
+                        // Display the note details dynamically
+                        // document.getElementById("note-title").innerText = data.note.title;
+                        // document.getElementById("note-content").innerText = data.note.note;
+                        //document.getElementById("note-created-at").innerText = data.note.created_at;
+                        //document.getElementById("note-important").innerText = data.note.important ? "Yes" : "No";
+                        console.log(data.note);
+
+                        console.log('Note data fetched successfully!');
+                        // create a form to update the note
+                        const form = document.createElement('form');
+                        form.setAttribute('action', `/update/`);
+                        form.setAttribute('method', 'PUT');
+                        form.setAttribute('id', 'update-form');
+
+
+                        const titleInput = document.createElement('input');
+                        titleInput.setAttribute('id', 'note-title');
+                        titleInput.setAttribute('type', 'text');
+                        titleInput.setAttribute('name', 'title');
+                        titleInput.setAttribute('value', data.note.title);
+                        const title_label = document.createElement('label');
+                        title_label.setAttribute('for', 'title');
+                        title_label.textContent = 'Title';
+                        
+                        const noteInput = document.createElement('textarea');
+                        noteInput.setAttribute('id', 'note-content');
+                        noteInput.setAttribute('name', 'note');
+                        noteInput.textContent = data.note.note;
+                        const note_label = document.createElement('label');
+                        note_label.setAttribute('for', 'note');
+                        note_label.textContent = 'Note';
+
+                        const importantInput = document.createElement('input');
+                        importantInput.setAttribute('id', 'note-important');
+                        importantInput.setAttribute('type', 'checkbox');
+                        importantInput.setAttribute('name', 'important');
+                        importantInput.checked = data.note.important;
+                        const label = document.createElement('label');
+                        label.setAttribute('for', 'important');
+                        label.textContent = 'Mark as Important';
+
+                        const idInput = document.createElement('input');
+                        idInput.setAttribute('type', 'hidden');
+                        idInput.setAttribute('name', 'id');
+                        idInput.setAttribute('value', data.note._id);
+
+                        const submitButton = document.createElement('button');
+                        submitButton.setAttribute('onclick', 'updateNoteFunc()');
+                        submitButton.setAttribute('class', 'success');
+                        submitButton.setAttribute('id', 'update-note');
+                        submitButton.textContent = 'Update Note';
+
+                        form.appendChild(idInput);
+                        form.appendChild(title_label);
+                        form.appendChild(titleInput);
+                        form.appendChild(note_label);
+                        form.appendChild(noteInput);
+                        form.appendChild(importantInput);
+                        form.appendChild(label);
+                        form.appendChild(submitButton);
+                        
+                        // create pop up box and display the form
+
+                        const modal = document.createElement('div');
+                        modal.setAttribute('class', 'modal');
+                        modal.setAttribute('id', 'modal');
+                        modal.style.display = 'block';
+                        modal.style.position = 'fixed';
+                        modal.style.zIndex = '1';
+                        modal.style.left = '25%';
+                        modal.style.top = '20px';
+                        modal.style.width = '50%';
+                        modal.style.height = 'auto';
+                        modal.style.overflow = 'auto';
+                        modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
+                        modal.style.display = 'flex';
+                        modal.style.justifyContent = 'center';
+                        modal.style.alignItems = 'center';
+                        modal.style.flexDirection = 'column';
+                        modal.style.padding = '20px';
+                        modal.style.backgroundColor = 'white';
+                        modal.style.borderRadius = '10px';
+                        modal.style.boxShadow = '0 4px 28px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19)';
+
+                        const closeButton = document.createElement('button');
+                        closeButton.setAttribute('class', 'close');
+                        closeButton.style.backgroundColor = 'red';
+                        closeButton.style.color = 'white';
+                        closeButton.style.border = 'none';
+                        closeButton.style.padding = '8px';
+                        closeButton.style.margin = '10px';
+                        closeButton.style.borderRadius = '5px';
+                        closeButton.textContent = 'Close';
+                        closeButton.style.cursor = 'pointer';
+                        closeButton.addEventListener('click', () => {
+                            modal.style.display = 'none';
+                        });
+
+                        modal.appendChild(form);
+                        modal.appendChild(closeButton);
+                        document.body.appendChild(modal);
+
+                        //const noteDetails = e.target.closest('li').querySelector('.note-details');
+                        //noteDetails.innerHTML = '';
+                        //noteDetails.appendChild(form);
+                    } else {
+                        alert(data.message || "Failed to fetch note details.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching note details:", error);
+                    alert("An error occurred while fetching note details.");
+                }
+            }
+
+            const updateNote = document.querySelectorAll('.actions .update-btn');
+            console.log(updateNote);
+            updateNote.forEach((item) => {
+                item.addEventListener('click',  (e) => {
+                    const noteId = e.target.dataset.id
+                    console.log(noteId);
+                    fetchNoteDetails(noteId);
+                });
+            });
+        //});
+        
+        
+    </script>
+</body>
+</html>
+<!-- This template is used to render the details of a single item. It uses the Jinja2 templating engine to render the item's name, description, and price. -->

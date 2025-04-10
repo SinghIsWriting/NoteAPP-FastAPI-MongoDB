@@ -1,0 +1,13 @@
+__pycache__
+.vscode
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.env
+venv
+main.py
+Tutorial
+.mypy_cache
