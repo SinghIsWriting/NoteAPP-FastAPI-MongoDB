@@ -74,7 +74,11 @@ Fast API/
 │   ├── index.html         # Form for adding notes
 │   ├── notes.html         # Page for displaying notes
 ├── static/                # Static files (CSS, JS, etc.)
-└── README.md              # Project documentation
+├── README.md              # Project documentation
+├── index.py             
+├── .gitignore             
+├── LICENSE             
+└── requirements.txt       # Required packages file
 ```
 
 ## API Endpoints
