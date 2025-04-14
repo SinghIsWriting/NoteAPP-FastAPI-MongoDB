@@ -73,8 +73,8 @@
                 </div>
                 <button type="submit" id="update-note">Update Note</button>
             </form>
-        </div> <!-- Closing modal-content div -->
-    </div> <!-- Closing modal div -->
+        </div>
+    </div>
 
     <div class="popup container">
         <h2>Note Details</h2>
@@ -193,6 +193,7 @@
                         modal.style.display = 'none';
                         document.getElementById("success-msg").style.display = 'block';
                         document.getElementById("success-msg").innerText = data.message;
+                        document.getElementById("notes-count").innerText = `You have ${data.note_count} notes`;
                         setTimeout(() => {
                             document.getElementById("success-msg").style.display = 'none';
                         }, 5000);
@@ -214,16 +215,12 @@
             async function fetchNoteDetails(noteId) {
                 try {
                     const response = await fetch(`/details/${noteId}`);
-                    //console.log(response);
                     const data = await response.json();
                     //console.log(data);
 
                     if (data.status === "success") {
                         // Display the note details dynamically
-                        //console.log(data.note);
-
                         //console.log('Note data fetched successfully!');
-
                         document.getElementById("note-id").value = data.note._id;
                         document.getElementById("note-title").value = data.note.title;
                         document.getElementById("note-content").value = data.note.note;
@@ -246,14 +243,11 @@
             async function fetchNote(noteId) {
                 try {
                     const response = await fetch(`/details/${noteId}`);
-                    //console.log(response);
                     const data = await response.json();
                     //console.log(data);
 
                     if (data.status === "success") {
                         // Display the note details dynamically
-                        //console.log(data.note);
-
                         document.getElementById("note-details").innerHTML = `<h3>${data.note.title}</h3><p>${data.note.note}</p>`;
                         document.querySelector('.popup').style.display = 'block';
                         document.querySelector('.popup .close').addEventListener('click', () => {
@@ -293,6 +287,36 @@
                      fetchNote(noteId);
                  });
              });
+
+             // Truncate note title and content when screen width is less than 600px
+            const noteTitle = document.querySelectorAll('.note-details-container h3');
+            const noteContent = document.querySelectorAll('.note-details-container p');
+            noteTitle.forEach((item) => {
+                if (window.innerWidth < 380) {
+                    item.innerText = item.innerText.length > 10 ? item.innerText.substring(0, 10) + '...' : item.innerText;
+                } else if (window.innerWidth < 400) {
+                    item.innerText = item.innerText.length > 12 ? item.innerText.substring(0, 12) + '...' : item.innerText;
+                } else if (window.innerWidth < 480) {
+                    item.innerText = item.innerText.length > 15 ? item.innerText.substring(0, 15) + '...' : item.innerText;
+                } else if (window.innerWidth < 600) {
+                    item.innerText = item.innerText.length > 18 ? item.innerText.substring(0, 18) + '...' : item.innerText;
+                } else {
+                    item.innerText = item.innerText.length > 25 ? item.innerText.substring(0, 25) + '...' : item.innerText;
+                }
+            });
+            noteContent.forEach((item) => {
+                if (window.innerWidth < 400) {
+                    item.innerText = item.innerText.length > 14 ? item.innerText.substring(0, 14) + '...' : item.innerText;
+                } else if (window.innerWidth < 480) {
+                    item.innerText = item.innerText.length > 20 ? item.innerText.substring(0, 20) + '...' : item.innerText;
+                } else if (window.innerWidth < 600) {
+                    item.innerText = item.innerText.length > 25 ? item.innerText.substring(0, 25) + '...' : item.innerText;
+                } else if (window.innerWidth < 800) {
+                    item.innerText = item.innerText.length > 50 ? item.innerText.substring(0, 50) + '...' : item.innerText;
+                } else {
+                    item.innerText = item.innerText.length > 70 ? item.innerText.substring(0, 70) + '...' : item.innerText;
+                }
+            });
         //});
         
         

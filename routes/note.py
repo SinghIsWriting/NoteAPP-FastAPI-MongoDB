@@ -71,7 +71,7 @@ async def update_note(request: Request):
             return {"status": "error", "message": "Note not found"}
         docs = conn.notes.notes.find({})
         docs_list = list(docs)
-        return {"status": "success", "message": "Note updated successfully!"}
+        return {"status": "success", "message": "Note updated successfully!", "note_count": len(docs_list)}
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
