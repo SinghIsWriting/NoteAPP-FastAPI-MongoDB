@@ -9,11 +9,35 @@
         .msg{
             display: none;
         }
+        #btn{
+            text-decoration: none;
+            background-color: white;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #btn:hover{
+            background-color: #333;
+            color: white;
+        }
+        #user_btn:hover{
+            background-color: #333;
+            color: white;
+            cursor: none;
+        }
     </style>
 </head>
 <body>
     <div class="container items">
-        <a class="add_btn" href="{{url_for('note_form')}}"> + Add Note</a>
+        <div class="nav">
+            <a id="btn" href="{{url_for('note_form')}}"> + Add Note</a>
+            {% if user %}
+            <a id="user_btn" href="#">{{ user.username }}</a>
+            <a class="logout_btn" href="{{url_for('logout')}}">Logout</a>
+            {% else %}
+            <a class="logout_btn" href="{{url_for('login')}}">Login</a>
+            {% endif %}
+        </div>
         <h2 id="notes-count">You have {{length}} notes</h2>
         <!-- if status is true, show success message -->
         {% if status %}
@@ -214,7 +238,13 @@
 
             async function fetchNoteDetails(noteId) {
                 try {
-                    const response = await fetch(`/details/${noteId}`);
+                    const response = await fetch(`/details/${noteId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-API-Key": "YOTEORFATSKISTNEYF-000",
+                        },
+                    });
                     const data = await response.json();
                     //console.log(data);
 
@@ -242,7 +272,13 @@
             }
             async function fetchNote(noteId) {
                 try {
-                    const response = await fetch(`/details/${noteId}`);
+                    const response = await fetch(`/details/${noteId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-API-Key": "YOTEORFATSKISTNEYF-000",
+                        },
+                    });
                     const data = await response.json();
                     //console.log(data);
 

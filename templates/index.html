@@ -5,8 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
     <title>Add Note | FastAPI Notes App</title>
+    <style>
+        #btn{
+            text-decoration: none;
+            background-color: white;
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #btn:hover{
+            background-color: #333;
+            color: white;
+        }
+        #user_btn:hover{
+            background-color: #333;
+            color: white;
+            cursor: none;
+        }
+    </style>
 </head>
 <body>
+    <div class="nav">
+        <a id="btn" href="{{url_for('all_items')}}">All Notes</a>
+        {% if user %}
+        <a id="user_btn" href="#">{{ user.username }}</a>
+        <a class="logout_btn" href="{{url_for('logout')}}">Logout</a>
+        {% else %}
+        <a class="login_btn" href="{{url_for('login')}}">Login</a>
+        {% endif %}
+    </div>
     <h1>Welcome to FastAPI Note App</h1>
     <p class="intro-para">This is a simple note saving application using FastAPI and Jinja2.</p>
     <div class="container">
@@ -26,7 +53,6 @@
             </div>
             <button type="submit">Submit</button>
         </form>
-        <a class="notes_btn" href="{{url_for('all_items')}}">All Notes</a>
     </div>
 
     <footer>
