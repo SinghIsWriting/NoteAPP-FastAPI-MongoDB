@@ -49,7 +49,7 @@ async def update_note(request: Request):
     try:
         form = await request.json()  # Parse JSON data from the request body
         note_id = form.get("id")
-        print(form)
+        # print(form)
         if not note_id:
             return {"status": "error", "message": "Note ID is required"}
 
@@ -65,11 +65,13 @@ async def update_note(request: Request):
         result = conn.notes.notes.update_one(
             {"_id": ObjectId(note_id)}, {"$set": updated_data}
         )
-        print(result)
+        # print(result)
 
         if result.matched_count == 0:
             return {"status": "error", "message": "Note not found"}
-        return {"status": "success", "message": "Note updated successfully! Please refresh the page"}
+        docs = conn.notes.notes.find({})
+        docs_list = list(docs)
+        return {"status": "success", "message": "Note updated successfully!"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
@@ -77,11 +79,14 @@ async def update_note(request: Request):
 @note_router.delete("/delete", response_class=JSONResponse)
 async def delete_note(request: Request):
     try:
-        form = await request.json()
+        form = await request.json()  # Parse JSON body
         id = form.get("id")
-        print(form)
+        if not id:
+            return {"status": "error", "message": "Note ID is required"}
         conn.notes.notes.delete_one({"_id": ObjectId(id)})
-        return {"status": "success", "message": "Note deleted successfully"}
+        docs = conn.notes.notes.find({})
+        docs_list = list(docs)
+        return {"status": "success", "message": "Note deleted successfully!", "note_count": len(docs_list)}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 

@@ -14,7 +14,7 @@
 <body>
     <div class="container items">
         <a class="add_btn" href="{{url_for('note_form')}}"> + Add Note</a>
-        <h2>You have {{length}} notes</h2>
+        <h2 id="notes-count">You have {{length}} notes</h2>
         <!-- if status is true, show success message -->
         {% if status %}
         <p class="msg1 success" id="success-msg">Note added successfully!</p>
@@ -27,7 +27,7 @@
         <ol>
             {% for note in notes %}
             <li data-id="{{ note._id }}">
-                <div class="note-details">
+                <div class="note-details-container">
                     <h3>{{ note.title }}</h3>
                     <p>{{ note.note }}</p>
                 </div>
@@ -75,6 +75,13 @@
             </form>
         </div> <!-- Closing modal-content div -->
     </div> <!-- Closing modal div -->
+
+    <div class="popup container">
+        <h2>Note Details</h2>
+        <p id="note-details">
+        </p>
+        <button class="close">Close</button>
+    </div>
     
     <footer>
         <p>&copy; 2025 FastAPI Notes App</p>
@@ -90,6 +97,19 @@
                 form.reset();
             });
 
+            // notedeails popup box hidden by default
+            const popup = document.querySelector('.popup');
+            const closeBtn = document.querySelector('.popup .close');
+            closeBtn.addEventListener('click', () => {
+                popup.style.display = 'none';
+            });
+            // close modal when clicking outside of it
+            window.addEventListener('click', (event) => {
+                if (event.target === popup) {
+                    popup.style.display = 'none';
+                }
+            });
+
             // delete note
             const deleteNote = document.querySelectorAll('.actions .delete-btn');
             deleteNote.forEach((item) => {
@@ -100,7 +120,7 @@
                         return;
                     }
                     const noteId = e.target.dataset.id;
-                    console.log(noteId);
+                    //console.log(noteId);
                     fetch(`/delete`, {
                         method: 'DELETE',
                         headers: {
@@ -118,6 +138,7 @@
                                 document.getElementById("success-msg").style.display = 'none';
                             }, 3000);
                             e.target.closest('li').remove();
+                            document.getElementById("notes-count").innerText = `You have ${data.note_count} notes`;
 
                         }else {
                             console.error('Failed to delete note:', data.message);
@@ -158,6 +179,17 @@
                     const data = await response.json();
                     if (data.status === "success") {
                         console.log('Note updated successfully!');
+                        // Update the note details in the UI
+                        const noteItem = document.querySelector(`li[data-id="${noteId}"]`);
+                        if (noteItem) {
+                            noteItem.querySelector('h3').innerText = title;
+                            noteItem.querySelector('p').innerText = note;
+                            const importantSpan = noteItem.querySelector('.important, .not-important');
+                            importantSpan.classList.remove('important', 'not-important');
+                            importantSpan.classList.add(important ? 'important' : 'not-important');
+                            importantSpan.innerText = important ? 'Important' : 'Not Important';
+                        }
+                        // Close the modal and show success message
                         modal.style.display = 'none';
                         document.getElementById("success-msg").style.display = 'block';
                         document.getElementById("success-msg").innerText = data.message;
@@ -172,7 +204,6 @@
                         setTimeout(() => {
                             document.getElementById("error-msg").style.display = 'none';
                         }, 3000);
-                        window.location.reload();
                     }
                 } catch (error) {
                     console.error("Error updating note:", error);
@@ -183,15 +214,15 @@
             async function fetchNoteDetails(noteId) {
                 try {
                     const response = await fetch(`/details/${noteId}`);
-                    console.log(response);
+                    //console.log(response);
                     const data = await response.json();
-                    console.log(data);
+                    //console.log(data);
 
                     if (data.status === "success") {
                         // Display the note details dynamically
-                        console.log(data.note);
+                        //console.log(data.note);
 
-                        console.log('Note data fetched successfully!');
+                        //console.log('Note data fetched successfully!');
 
                         document.getElementById("note-id").value = data.note._id;
                         document.getElementById("note-title").value = data.note.title;
@@ -212,16 +243,56 @@
                     alert("An error occurred while fetching note details.");
                 }
             }
+            async function fetchNote(noteId) {
+                try {
+                    const response = await fetch(`/details/${noteId}`);
+                    //console.log(response);
+                    const data = await response.json();
+                    //console.log(data);
+
+                    if (data.status === "success") {
+                        // Display the note details dynamically
+                        //console.log(data.note);
+
+                        document.getElementById("note-details").innerHTML = `<h3>${data.note.title}</h3><p>${data.note.note}</p>`;
+                        document.querySelector('.popup').style.display = 'block';
+                        document.querySelector('.popup .close').addEventListener('click', () => {
+                            document.querySelector('.popup').style.display = 'none';
+                        });
+                        window.addEventListener('click', (event) => {
+                            if (event.target === popup) {
+                                popup.style.display = 'none';
+                            }
+                        });
+                    
+                    } else {
+                        alert(data.message || "Failed to fetch note details.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching note details:", error);
+                    alert("An error occurred while fetching note details.");
+                }
+            }
 
             const updateNote = document.querySelectorAll('.actions .update-btn');
-            console.log(updateNote);
+            //console.log(updateNote);
             updateNote.forEach((item) => {
                 item.addEventListener('click',  (e) => {
                     const noteId = e.target.dataset.id
-                    console.log(noteId);
+                    //console.log(noteId);
                     fetchNoteDetails(noteId);
                 });
             });
+
+            // display note details in pop up box
+            const noteDetails = document.querySelectorAll('.note-details-container');
+            noteDetails.forEach((item) => {
+                 item.addEventListener('click', (e) => {
+                     const noteId = e.target.closest('li').dataset.id;
+                     //console.log(noteId);
+                     fetchNote(noteId);
+                 });
+             });
         //});
         
         
