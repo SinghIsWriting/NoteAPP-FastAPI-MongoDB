@@ -2,6 +2,8 @@
 
 A simple and efficient Note Management Application built using **FastAPI** and **MongoDB**. This application allows users to create, read, update, and delete notes with additional features like marking notes as important.
 
+## Deployed App Link: https://fastnote.devhome.me
+
 ## Features
 
 - **Create Notes**: Add new notes with a title, content, and an optional "important" flag.
